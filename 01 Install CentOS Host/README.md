@@ -63,6 +63,13 @@ Silly me...
 
 If the option was "Make this user a sudoer" rather than "Make this user and administrator" I think it would have been more clear. Yay Learning!
 
+I fixed this [by running][9]
+```
+%> su -
+%> usermod -a -G wheel bryce
+```
+
+`-a` is for append to the following `-G` group `wheel` (admins).
 
 [0]: https://www.centos.org/download/ 
 [1]: https://unetbootin.github.io/
@@ -73,3 +80,4 @@ If the option was "Make this user a sudoer" rather than "Make this user and admi
 [6]: http://pcpartpicker.com/list/49RV7h
 [7]: https://ask.fedoraproject.org/en/question/9584/while-using-libvirt-how-can-i-use-a-location-other-than-varliblibvirtimages-to-store-my-images/
 [8]: https://wiki.archlinux.org/index.php/LVM_(Espa%C3%B1ol)
+[9]: http://unix.stackexchange.com/a/210932
