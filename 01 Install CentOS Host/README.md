@@ -45,6 +45,7 @@ I ended up with
 - On the 120gb ssd
   - 512mb `/boot`
   - 4096mb `swap`
+  - 5120mb `/root`
   - 20gb `/home`
 - On the remaining 2TB hdd
   - 2TB `/var`
