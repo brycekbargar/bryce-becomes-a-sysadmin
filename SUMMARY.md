@@ -1,4 +1,4 @@
 # Summary
 
-* Install CentOS Host
+* [Install CentOS Host](install_centos_host.md)
 
