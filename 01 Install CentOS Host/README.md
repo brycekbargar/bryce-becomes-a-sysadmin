@@ -72,6 +72,24 @@ I fixed this [by running][9]
 
 `-a` is for append to the following `-G` group `wheel` (admins).
 
+A brief interlude while I updated [my dotfiles][10] to work with CentOS.
+
+A less brief interlude while a hacked together ssh acccess. File permissions are...
+
+To find the [ip address of a CentOS][11] machine use `sudo /sbin/ip addr`
+
+```
+bryce @ Bryces-MacBook-Pro vagrant ssh ~/vagrant/centos_7
+%> ssh bryce@192.168.0.109
+Last login: Mon Aug  8 04:30:53 2016
+bryce @ kvm sudo /sbin/ip addr ~
+%>
+```
+
+Success! 
+
+
+
 [0]: https://www.centos.org/download/ 
 [1]: https://unetbootin.github.io/
 [2]: https://wiki.centos.org/es/HowTos/InstallFromUSBkey
@@ -82,3 +100,5 @@ I fixed this [by running][9]
 [7]: https://ask.fedoraproject.org/en/question/9584/while-using-libvirt-how-can-i-use-a-location-other-than-varliblibvirtimages-to-store-my-images/
 [8]: https://wiki.archlinux.org/index.php/LVM_(Espa%C3%B1ol)
 [9]: http://unix.stackexchange.com/a/210932
+[10]: https://github.com/brycekbargar/dotfiles
+[11]: https://www.centos.org/forums/viewtopic.php?t=44484
