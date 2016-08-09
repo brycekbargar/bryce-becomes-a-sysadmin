@@ -26,7 +26,11 @@ So I started looking at VM provisioning tools and found Cobbler, which SpaceWalk
 
 ![SpaceWalking Dog](http://i.giphy.com/xDQ3Oql1BN54c.gif)
 
+I have never manually created a Machine on a KVM Hypervisor so how am I supposed to know what tools make my life easier? I have no idea how PXE/DNS/DHCP actually works so how am I supposed to parse "getting started" docs that reference these technologies heavily? 
 
+I've always been a fan of doing the simplest thing that possibly works and building up complexity as needed. Now obviously, since one of the goals of building a home lab is to simulate a small web-app productions setup, I am going to need to dig into some extraneous complication. But it should never be the first step.
+
+So. Step One. Manually provision a DHCP server on KVM and learn about how it actually works.
 
 [stacki]: http://www.stacki.com/
 [forked-cobbler]: https://www.redhat.com/archives/spacewalk-list/2016-March/msg00060.html
