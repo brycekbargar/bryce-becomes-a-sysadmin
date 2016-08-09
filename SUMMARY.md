@@ -2,5 +2,5 @@
 
 * [Introduction](README.md)
 * [Install CentOS Host](install_centos_host.md)
-* Installing Spacewalk
+* [Creating a DHCP Server](creating_a_dhcp_server.md)
 
