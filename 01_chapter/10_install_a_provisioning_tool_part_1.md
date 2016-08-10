@@ -1,4 +1,4 @@
-# Creating a DHCP Server #
+# Install a Provisioning Tool (part 1) #
 
 So... I was all ok with following the guide until I went to [install SpaceWalk][install-spacewalk] and saw it required Java. I nope'd my way out of there as quickly as possible...
 

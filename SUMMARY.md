@@ -2,6 +2,8 @@
 
 - [Introduction](README.md)
 - [01 - Automating the Setup of a Single Server](01_chapter/README.md)
-  - [Install CentOS Host](01_chapter/install_centos_host.md)
-  - [Creating a DHCP Server](01_chapter/creating_a_dhcp_server.md)
+  - [Install CentOS Host](01_chapter/01_install_centos_host.md)
+  - [Install a Provisioning Tool (part 1)](01_chapter/10_install_a_provisioning_tool.md)
+  - [Creating a DHCP Server](01_chapter/20_creating_a_dhcp_server.md)
+
 
