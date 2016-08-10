@@ -8,11 +8,13 @@ It's just that I don't really like using technology I don't understand and Java 
 
 ### The Search for Alternatives ###
 
-I have been exposed to both Puppet and Chef in my career. Though maybe I'm biased because I was trying to manange Windows environments with them, I find them both to be unintuitive and difficult.
+The first I looked at was Katello. It seemed promising, except that it was tightly integrated with Foreman and by extension, Puppet.
+
+A short digression... I have a small amount of Chef "production" experience. Though maybe I'm biased because I was trying to manange Windows environments, I found it to be unintuitive and difficult.
 
 Chef, despite having a large collection of community cookbooks always seems to turn into a hot mess of untested and spaghettified ruby scripts specific to a given environment, (i.e. `prod`, `dev`, `qa`...). Then there's the massive chain of "optional" tools, each complicated enough to require dedicated study unless you're ok with blindly following StackOverflow posts. RVM, knife, berkshelf, chef-solo...
 
-Puppet is just weird. It's like a sub-dialect of Ruby (which I'm already not a fan of...). On top of that it has a lot of the same issues as Chef.
+Puppet is just weird. It's like a sub-dialect of Ruby (which I'm already not a fan of...). On top of that it has a lot of the same issues as Chef. So, while I would love to use an official Red Hat provisioning tool I would like to avoid tying myself to a specific automation framework out of the gates. Not even mentioning I'm using Red Hat right now because I needed to start somewhere but there are no guarantees I'll keep up with it.
 
 Ansible has recently been of interest to me. It seems built for simplicity and  transparency, two things I really like... Buuuut, Ansible Tower is $5000/year. There is talk about this changing with [Red Hat's purchase of Ansible][red-hat-ansible].
 
