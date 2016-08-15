@@ -12,11 +12,11 @@ Ok. It's actually pretty straightforward so far.
 
 #### 2.3 Required Packages ####
 
-> "Verify the following kernel modules are loaded, and if not load manually: 
+> "Verify the following kernel modules are loaded, and if not load manually:
 
->kvm
-  
->kvm_intel (only on Intel-based systems)"
+> kvm
+
+> kvm_intel (only on Intel-based systems)"
 
 I did this by [using `lsmod`][lsmod].
 
@@ -186,7 +186,7 @@ This seems sketchy and bad though? Like, just making everything root feels wrong
 
 Further reading of that question led to
 
-> " I also had to change the owner of one of my vms. It belonged to root which led to an access denied. sudo chown -R libvirt-qemu:kvm dbos/ubuntu-kvm/. You can run ls -l on/your/vm/dir/and/its/subdirs/ to check permissions at each level. Ensure none of them belong to the root group and user"
+> "I also had to change the owner of one of my vms. It belonged to root which led to an access denied. sudo chown -R libvirt-qemu:kvm dbos/ubuntu-kvm/. You can run ls -l on/your/vm/dir/and/its/subdirs/ to check permissions at each level. Ensure none of them belong to the root group and user"
 
 I assume that because I'm running `sudo virt-install ...` it's creating the images as root?. Let's remove the sudo and try...
 
