@@ -94,7 +94,9 @@ bryce @ kvm
 %> ./create-dhcp-box
 WARNING CDROM media does not print to the text console by default, so you likely will not see text install output. You might want to use --location. See the man page for examples of using --location with CDROM media
 
-Starting install...Allocating 'dhcp-6.qcow2' | 10 GB 00:00:00ERROR internal error: process exited while connecting to monitor: 2016-08-14T19:21:24.717391Z qemu-kvm: -drive file=/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso,if=none,id=drive-ide0-0-0,readonly=on,format=raw: could not open disk image /home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso: Could not open '/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso': Permission denied
+Starting install...
+Allocating 'dhcp-6.qcow2' | 10 GB 00:00:00
+ERROR internal error: process exited while connecting to monitor: 2016-08-14T19:21:24.717391Z qemu-kvm: -drive file=/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso,if=none,id=drive-ide0-0-0,readonly=on,format=raw: could not open disk image /home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso: Could not open '/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso': Permission denied
 
 Domain installation does not appear to have been successful.If it was, you can restart your domain by running: virsh --connect qemu:///system start dhcpotherwise, please restart your installation.
 
@@ -147,16 +149,103 @@ bryce @ kvm
 
 I tried globbing `/var/lib/libvirt/images/dhcp-*.qcow2` and various other combinations but I think(?) there's a file permissions issue with zsh expansion? Does that even makes sense? I will have to check into it later when I'm on less of a "roll".
 
-I added `--connect quemu:///system \` to my creation command and
+I added `--connect qemu:///system \` to my creation command and
+
+```
+bryce @ kvm
+%> ./create-dhcp-box
+WARNING CDROM media does not print to the text console by default, so you likely will not see text install output. You might want to use --location. See the man page for examples of using --location with CDROM media
+
+Starting install...
+Allocating 'dhcp.qcow2' | 10 GB 00:00:00
+ERROR internal error: process exited while connecting to monitor: 2016-08-15T11:41:56.504281Z qemu-kvm: -drive file=/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso,if=none,id=drive-ide0-0-0,readonly=on,format=raw: could not open disk image /home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso: Could not open '/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso': Permission denied
+
+Domain installation does not appear to have been successful.If it was, you can restart your domain by running: virsh --connect qemu:///system start dhcpotherwise, please restart your installation.
+
+```
+
+lol progress...
+
+[This question suggests][qemu-root] running qemu as root. Or at least I think that's what the implications of the following are.
+
+```
+=== /etc/libvirt/qemu.conf ===
+
+...
+
+User = "root"
+group = "root"
+
+...
+
+===
+
+```
+
+This seems sketchy and bad though? Like, just making everything root feels wrong... 
+
+Further reading of that question led to
+
+> " I also had to change the owner of one of my vms. It belonged to root which led to an access denied. sudo chown -R libvirt-qemu:kvm dbos/ubuntu-kvm/. You can run ls -l on/your/vm/dir/and/its/subdirs/ to check permissions at each level. Ensure none of them belong to the root group and user"
+
+I assume that because I'm running `sudo virt-install ...` it's creating the images as root?. Let's remove the sudo and try...
+
+```
+bryce @ kvm%> ./create-dhcp-boxERROR authentication failed: no agent is available to authenticate
+```
+
+Hmmm... I guess that makes sense. Why would I be able to access `qemu:///system` as a non-root user?
+
+A quick confirmation.
 
 ```
 bryce @ kvm 
-%> ./create-dhcp-box
-ERROR no connection driver available for quemu:///system
+%> virsh --connect qemu:///system
+error: failed to connect to the hypervisor
+
+bryce @ kvm 
+%> sudo virsh --connect qemu:///system
+Welcome to virsh, the virtualization interactive terminal.
+
+Type: 'help' for help with commands
+      'quit' to quit
+
+virsh # quit
 ```
 
-Yay? Progress?
+Progress! I think(?) I need to work on `libvirt` or `qemu` permissions? I noticed a couple of interesting groups and users
 
+
+```
+bryce @ kvm
+%> less /etc/group
+...
+kvm:x:36:qemu
+qemu:x:107:
+libvirt:x:991:
+...
+
+bryce @ kvm 
+%> less /etc/passwd
+...
+qemu:x:107:107:qemu user:/:/sbin/nologin
+...
+
+bryce @ kvm
+%> ls -lA ~/isos
+total 4228096
+-rw-rw-rw-. 1 qemu qemu 4329570304 Aug 11 06:25 CentOS-7-x86_64-DVD-1511.iso
+
+```
+
+So. There are some `kvm` specific groups and a `qemu` user which happens to own the iso once I try running `virt-install`. I'm assuming that somehow I need to give `qemu` permission to `qemu:///system` and possibly some of the `kvm` groups as well? All the while **_I_** don't want permissions to it because I should never need to connect directly. Really it's all speculation at this point...
+
+_An aside: I reeeeeally don't like copy + pasting "solutions" without understanding exactly why they work, especially in my own projects where there isn't a time constraint, double-especially when the "solutions" are reeking with code smell like making an arbitrary thing root._
+
+
+
+
+[qemu-root]: http://superuser.com/questions/298426/kvm-image-failed-to-start-with-virsh-permission-denied?answertab=active#tab-top
 [libvirt-qemu]: http://wiki.libvirt.org/page/FAQ#What_is_the_difference_between_qemu:.2F.2F.2Fsystem_and_qemu:.2F.2F.2Fsession.3F_Which_one_should_I_use.3F
 [libvirt-list]: http://wiki.libvirt.org/page/FAQ#My_VM_doesn.27t_show_up_with_.27virsh_list.27
 [partitioning]: ./00_install_centos_host.md
