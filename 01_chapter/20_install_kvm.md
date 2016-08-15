@@ -110,7 +110,8 @@ qemu:///session
 
 ```
 
-After [some follow up reading][libvirt-qemu] I found that
+plus [some follow-up reading][libvirt-qemu] led me to
+
 > "All 'system' URIs (be it qemu, lxc, uml, ...) connect to the libvirtd daemon running as root which is launched at system startup. Virtual machines created and run using 'system' are usually launched as root, unless configured otherwise (for example in /etc/libvirt/qemu.conf).
 
 > All 'session' URIs launch a libvirtd instance as your local user, and all VMs are run with local user permissions.
