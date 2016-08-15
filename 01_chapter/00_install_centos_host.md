@@ -79,10 +79,11 @@ A less brief interlude while a hacked together ssh acccess. File permissions are
 To find the [ip address of a CentOS][11] machine use `sudo /sbin/ip addr`
 
 ```
-bryce @ Bryces-MacBook-Pro vagrant ssh ~/vagrant/centos_7
+bryce @ Bryces-MacBook-Pro
 %> ssh bryce@192.168.0.109
 Last login: Mon Aug  8 04:30:53 2016
-bryce @ kvm sudo /sbin/ip addr ~
+
+bryce @ kvm 
 %>
 ```
 
