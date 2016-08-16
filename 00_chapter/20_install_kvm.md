@@ -242,9 +242,37 @@ So. There are some `kvm` specific groups and a `qemu` user which happens to own 
 
 _An aside: I reeeeeally don't like copy + pasting "solutions" without understanding exactly why they work, especially in my own projects where there isn't a time constraint, double-especially when the "solutions" are reeking with code smell like making an arbitrary thing root._
 
+My suspicions are further confirmed after [finding someone who had success][libvirt-auth] disabling auth for libvirt (though that is obviously wrong, even for a lab...).
+
+No idea why [this was hard to find][qemu-hypervisor]...
+
+> You are trying to connect using unix socket. The connection to "qemu" without any hostname specified is by default using unix sockets. If there is no error running this command as root it's probably just misconfigured.
+
+> Solution
+
+> If you want to be able to connect as non-root user using unix sockets, configure following options in '/etc/libvirt/libvirtd.conf' accordingly:
+```
+unix_sock_group = <group>
+unix_sock_ro_perms = <perms>
+unix_sock_rw_perms = <perms>
+```
+Yay! A starting point!
+
+Ok. [Looks like the above is for][libvirt-auth] using unix sockets for permissions.
+
+> "If libvirt does not contain support for PolicyKit, then access control for the UNIX domain socket is done using traditional file user/group ownership and permissions. There are 2 sockets, one for full read-write access, the other for read-only access."
+
+`unix_sock_rw_perms` must be for **r**ead/**w**rite and `unix_sock_ro_perms` must be for **r**ead**only** permissions. (also it took me a little to remember in unix everthing is a file including sockets...).
+
+[CentOS obviously supports PolicyKit][redhat-policykit] so I'm assuming the above docs for connecting as a non-root user don't apply. Time to learn about PolicyKit!
+
+Javascript lol.
 
 
-
+[redhat-policykit]: https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Desktop_Migration_and_Administration_Guide/policykit.html
+[libvirt-auth]: https://libvirt.org/auth.html
+[qemu-hypervisor]: http://wiki.libvirt.org/page/Failed_to_connect_to_the_hypervisor
+[libvrt-auth]: http://unix.stackexchange.com/questions/272646/centos-7-kvm-auth-failed-no-agent-available
 [qemu-root]: http://superuser.com/questions/298426/kvm-image-failed-to-start-with-virsh-permission-denied?answertab=active#tab-top
 [libvirt-qemu]: http://wiki.libvirt.org/page/FAQ#What_is_the_difference_between_qemu:.2F.2F.2Fsystem_and_qemu:.2F.2F.2Fsession.3F_Which_one_should_I_use.3F
 [libvirt-list]: http://wiki.libvirt.org/page/FAQ#My_VM_doesn.27t_show_up_with_.27virsh_list.27
