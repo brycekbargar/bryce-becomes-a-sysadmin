@@ -104,6 +104,10 @@ Domain installation does not appear to have been successful.If it was, you can r
 
 Awesome.
 
+_An aside: I've now basically abandoned [the aforementioned whitepaper][whitepaper] since I think I've gotten all I can out of it and am now striking out on my own into the wild_
+
+### Authentication, libvirt, and you ###
+
 It looks like a permissions issue? (totally ignoring the cdrom/gui issue for now...) I found a [pretty helpful doc][libvirt-list] and running
 ```
 bryce @ kvm 
@@ -266,7 +270,11 @@ Ok. [Looks like the above is for][libvirt-auth] using unix sockets for permissio
 
 [CentOS obviously supports PolicyKit][redhat-policykit] so I'm assuming the above docs for connecting as a non-root user don't apply. Time to learn about PolicyKit!
 
-Javascript lol.
+> "As far as the new features are concerned, authorization rules are now defined in JavaScript `.rules` files"
+
+lol javascript.
+
+
 
 
 [redhat-policykit]: https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Desktop_Migration_and_Administration_Guide/policykit.html
