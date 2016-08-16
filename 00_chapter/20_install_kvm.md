@@ -266,7 +266,7 @@ Ok. [Looks like the above is for][libvirt-auth] using unix sockets for permissio
 
 > "If libvirt does not contain support for PolicyKit, then access control for the UNIX domain socket is done using traditional file user/group ownership and permissions. There are 2 sockets, one for full read-write access, the other for read-only access."
 
-`unix_sock_rw_perms` must be for **r**ead/**w**rite and `unix_sock_ro_perms` must be for **r**ead**only** permissions. (also it took me a little to remember in unix everthing is a file including sockets...).
+`unix_sock_rw_perms` must be for **r**ead/**w**rite and `unix_sock_ro_perms` must be for **r**ead**o**nly permissions. (also it took me a little to remember in unix everthing is a file including sockets...).
 
 [CentOS obviously supports PolicyKit][redhat-policykit] so I'm assuming the above docs for connecting as a non-root user don't apply. Time to learn about PolicyKit!
 
@@ -274,9 +274,136 @@ Ok. [Looks like the above is for][libvirt-auth] using unix sockets for permissio
 
 lol javascript.
 
+> "The simplest way to ensure that your old rules are not overridden is to begin the name of all other .rules files with a number higher than 49."
 
+I bet they would recommend using `!important` in CSS to ensure your old rules are not overridden...
 
+After studying enough of `polkit` to [understand this rule][libvirt-polkit] and then adding the policy I still had no success connecting to `qemu:///system` as non-root. :(
 
+[Fortunately,][arch-polkit]
+
+> "As of libvirt 1.2.16, members of the `libvirt` group have passwordless access to the RW daemon socket by default."
+
+```
+bryce @ kvm 
+%> sudo usermod -a -G libvirt bryce
+
+bryce @ kvm
+%> virsh --connect qemu:///system
+Welcome to virsh, the virtualization interactive terminal.
+
+Type: 'help' for help with commands
+      'quit' to quit
+
+virsh # quit
+
+bryce @ kvm
+%> sudo usermod -a -G libvirt qemu
+
+bryce @ kvm
+%> ./create-dhcp-box
+
+WARNING CDROM media does not print to the text console by default, so you likely will not see text install output. You might want to use --location. See the man page for examples of using --location with CDROM media
+
+Starting install...
+Allocating 'dhcp.qcow2' | 10 GB 00:00:00
+ERROR internal error: process exited while connecting to monitor: 2016-08-16T11:31:06.403938Z qemu-kvm: -drive file=/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso,if=none,id=drive-ide0-0-0,readonly=on,format=raw: could not open disk image /home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso: Could not open '/home/bryce/isos/CentOS-7-x86_64-DVD-1511.iso': Permission denied
+
+Domain installation does not appear to have been successful.
+If it was, you can restart your domain by running:
+   virsh --connect qemu:///system start dhcp
+otherwise, please restart your installation.
+```
+
+I hate computers...
+
+Well. I guess going down the `polkit`/`libvirt` rabbit hole wasn't a complete waste of time since I learned stuff? Wait! I removed myself and qemu from the `libvirt` group since I want to keep the permissions at the minimum viable and `qemu` can't connect anymore! It wasn't a waste! 
+
+Having `qemu` in the `libvirt` group solves the `ERROR authentication failed: no agent is available to authenticate` issue when using `qemu:///system`!
+
+Is it possible for one woman to be this dense? I think it is...
+
+**The user running `virt-install` has to be able to connect to the libvirt daemon.**
+
+Which basically I had setup from the beginning.
+
+Basically all the error message is telling me is that I had the iso in a place that `qemu` couldn't access, which makes total sense since it was in my home directory...
+
+```
+bryce @ kvm
+%> sudo gpasswd -d bryce libvirt
+
+bryce @ kvm
+%> sudo gpasswd -d qemu libvirt
+
+bryce @ kvm
+%> sudo mkdir -p /var/lib/libvirt/isos
+
+# probably should have been a better copy command?
+bryce @ kvm
+%> sudo mv ~/isos/CentOS-7-x86_64-DVD-1511.iso /var/lib/libvirt/isos
+
+bryce @ kvm 
+%> sudo ls -lAd /var/lib/libvirt/* /var/lib/libvirt/isos/*drwx--x--x. 2 root root 6 Jun 23 09:26 /var/lib/libvirt/bootdrwxr-xr-x. 2 root root 4096 Aug 16 06:51 /var/lib/libvirt/dnsmasqdrwx--x--x. 2 root root 6 Jun 23 09:26 /var/lib/libvirt/filesystemsdrwx--x--x. 2 root root 61 Aug 16 06:38 /var/lib/libvirt/imagesdrwxr-xr-x. 2 root root 41 Aug 16 06:33 /var/lib/libvirt/isos-rw-rw-rw-. 1 qemu qemu 4329570304 Aug 11 06:25 /var/lib/libvirt/isos/CentOS-7-x86_64-DVD-1511.isodrwx------. 2 root root 6 Jun 23 09:26 /var/lib/libvirt/lxcdrwx------. 2 root root 6 Jun 23 09:26 /var/lib/libvirt/networkdrwxr-x--x. 7 qemu qemu 93 Aug 16 06:50 /var/lib/libvirt/qemu
+
+bryce @ kvm
+%> nvim create-dhcp-box
+
+=== create-dhcp-box ===
+#!/bin/sh
+sudo virt-install \
+ --connect qemu:///system
+ --network bridge:br0 \
+ --name vm1 \
+ --ram=1024 \
+ --vcpus=1 \
+ --disk size=10 \
+ --graphics none \
+ --cdrom /var/lib/libvirt/isos/CentOS-7-x86_64-DVD-1511.iso
+
+===
+
+bryce @ kvm 
+%> ./create-dhcp-box
+WARNING CDROM media does not print to the text console by default, so you likely will not see text install output. You might want to use --location. See the man page for examples of using --location with CDROM media
+
+Starting install...
+Allocating 'dhcp-2.qcow2' | 10 GB 00:00:00
+Creating domain... | 0 B 00:00:00
+Connected to domain dhcp
+Escape character is ^]
+
+^]^]^]Domain installation still in progress. You can reconnect to
+the console to complete the installation process.
+
+```
+
+Success! (sort of...)
+
+```
+bryce @ kvm 
+%> sudo virsh list --all
+  Id        Name        State
+----------------------------------------------------
+  -        dhcp        shut off
+
+bryce @ kvm
+%> sudo virsh undefine dhcp
+Domain dhcp has been undefined
+
+bryce @ kvm
+%> sudo virsh list --all
+  Id        Name        State
+----------------------------------------------------
+
+bryce @ kvm
+%> sudo rm -f /var/lib/libvirt/images/dhcp.qcow2
+```
+
+### Headless Install of CentOS 7 Virtual Machine ###
+
+[arch-polkit]: https://wiki.archlinux.org/index.php/Libvirt#Using_polkit
+[libvirt-polkit]: https://goldmann.pl/blog/2012/12/03/configuring-polkit-in-fedora-18-to-access-virt-manager/
 [redhat-policykit]: https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Desktop_Migration_and_Administration_Guide/policykit.html
 [libvirt-auth]: https://libvirt.org/auth.html
 [qemu-hypervisor]: http://wiki.libvirt.org/page/Failed_to_connect_to_the_hypervisor
