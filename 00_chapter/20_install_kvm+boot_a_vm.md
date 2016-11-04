@@ -67,7 +67,7 @@ The command `sysctl -p /etc/sysctl.conf` can be shortened to `sysctl -p` because
 > 
 > Load in sysctl settings from the file specified or \/etc\/sysctl.conf if none given...
 
-# Boot a VM
+# 3 Boot a VM
 
 I figured I would screw up this command a couple times so I created a "script" to execute it instead. I made \(_what I thought were_\) sensible modifications to the install arguments. **Note:** you can't use the `--extra-args` flag with cdrom apparently \(which is ok by me because I have no idea what a tty is...\)
 
